@@ -15,7 +15,7 @@ PASSWORD = os.getenv("DB_PASSWORD")
 if not USER or not PASSWORD:
     raise ValueError("Missing environment variables")
 
-
+@contextmanager
 def get_db_cursor(commit=False):
     connection = mysql.connector.connect(
         host = "localhost",
@@ -23,3 +23,38 @@ def get_db_cursor(commit=False):
         password = PASSWORD,
         database="expense_manager"
     )
+
+    cursor = connection.cursor(dictionary=True)
+    try:
+        yield cursor
+        if commit:
+            connection.commit()
+    finally:
+        cursor.close()
+        connection.close()
+
+def fetch_all_records():
+    query = "SELECT * from expenses"
+    with get_db_cursor() as cursor:
+        cursor.execute(query)
+        expenses = cursor.fetchall()
+        for expense in expenses:
+            print(expense)
+
+def fetch_expenses_for_date(expense_date):
+    with get_db_cursor() as cursor:
+        cursor.execute("SELECT * FROM expenses WHERE expense_date = %s", [expense_date])
+        expenses = cursor.fetchall()
+        for expense in expenses:
+            print(expense)
+
+def insert_expense(expense_date, amount, category, notes):
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute(
+            "INSERT INTO expenses (expense_date, amount, category, notes) VALUES (%s, %s, %s, %s)",
+            [expense_date, amount, category, notes]
+        )
+
+def delete_expenses_for_date(expense_date):
+    with get_db_cursor(commit=True) as cursor:
+        cursor.execute("DELETE FROM expenses WHERE expense_date = %s", [expense_date])
