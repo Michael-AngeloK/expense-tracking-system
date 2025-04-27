@@ -58,3 +58,10 @@ def insert_expense(expense_date, amount, category, notes):
 def delete_expenses_for_date(expense_date):
     with get_db_cursor(commit=True) as cursor:
         cursor.execute("DELETE FROM expenses WHERE expense_date = %s", [expense_date])
+
+if __name__ == "__main__":
+    # expenses = fetch_expenses_for_date("2024-08-01")
+    # print(expenses)
+    # insert_expense("2025-04-26", 40, "Food", "Spicy Food")
+    # delete_expenses_for_date("2025-04-26")
+    pass
